@@ -7,4 +7,6 @@ module.exports = async (message, bot) => {
             parse_mode: "HTML"
         })
     }
+
+    console.log (message)
 }
