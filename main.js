@@ -18,5 +18,3 @@ bot.on('message', async (message) => {
 bot.on('inline_query', async (query) => {
     await QUERIES(query, bot)
 })
-
-
