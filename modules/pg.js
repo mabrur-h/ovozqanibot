@@ -11,6 +11,7 @@ async function postgres () {
         let db = {};
 
         db.users = await Models.UserModel(Sequelize, sequelize)
+        db.audios = await Models.AudioModel(Sequelize, sequelize)
 
         await sequelize.sync({force: false})
         return db

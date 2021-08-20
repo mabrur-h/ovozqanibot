@@ -12,7 +12,8 @@ export default class Commands {
             let user = await db.users.create({
                 user_id: message.from.id,
                 name: message.from.first_name,
-                username: message.from.username
+                username: message.from.username,
+                step: 1
             })
             await bot.sendMessage(message.chat.id, `successfully registered`)
         }
@@ -33,4 +34,41 @@ export default class Commands {
         await bot.sendVoice(message.chat.id, file.file_id)
     }
 
+    static async addVoice(bot, db, message) {
+        await bot.sendMessage(message.chat.id, 'Audio jonating')
+        if (message.text === '12') {
+            console.log(message)
+            await db.users.update({
+                step: 2
+            }, {
+                where: {
+                    user_id: `${message.from.id}`
+                }
+            })
+
+            let user = await db.users.findOne({
+                where: {
+                    user_id: `${message.from.id}`
+                }
+            })
+
+            if (user.dataValues.step === 2) {
+                let findVoice = await db.audios.findOne({
+                    where: {
+                        file_id: message.voice.file_id
+                    }
+                })
+
+                if (!findVoice) {
+                    await db.audios.create({
+                        file_id: message.voice.file_id,
+                        name: "ovoz 1",
+                        tags: ["ovoz", "bot", "mot"]
+                    })
+                }
+            }
+        } else {
+            await bot.sendMessage(message.chat.id, 'audio jonating!')
+        }
+    }
 }

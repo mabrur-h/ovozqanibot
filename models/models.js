@@ -18,6 +18,28 @@ export default class Models {
                 type: Sequelize.DataTypes.ENUM,
                 values: ["admin", "moderator", "user"],
                 defaultValue: "user"
+            },
+            step: {
+                type: Sequelize.DataTypes.INTEGER,
+                allowNull: false,
+                defaultValue: 0
+            }
+        })
+    }
+
+    static async AudioModel (Sequelize, sequelize) {
+        return sequelize.define('audios', {
+            file_id: {
+                type: Sequelize.DataTypes.STRING,
+                primaryKey: true
+            },
+            name: {
+                type: Sequelize.DataTypes.STRING,
+                allowNull: false,
+            },
+            tags: {
+                type: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.STRING),
+                allowNull: true
             }
         })
     }

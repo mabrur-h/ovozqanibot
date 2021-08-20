@@ -12,9 +12,10 @@ const bot = new TelegramBot(TOKEN, {
 bot.on('message', async (message) => {
     try {
         let db = await postgres()
-        console.log(message)
+
         await Commands.botStart(bot, db, message)
         await Commands.botRandom(bot, db, message)
+        await Commands.newVoice(bot, db, message)
 
     } catch (e) {
         await bot.sendMessage(e)
