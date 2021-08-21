@@ -18,6 +18,7 @@ bot.on('message', async (message) => {
         await Commands.newVoice(bot, db, message)
         await Commands.newAdmin(bot, db, message)
         await Commands.getAudios(bot, db, message)
+        await Commands.changeSettings(bot, db, message)
 
     } catch (e) {
         console.log(e)

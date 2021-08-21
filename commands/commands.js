@@ -30,10 +30,10 @@ export default class Commands {
             }
 
             let keyboard
-            if (findUser.dataValues.role === 'admin') {
-                keyboard = [["Top audiolar"], ["Ovoz qo'shish", "Haftalik statistika"], ["Kunlik statistika", "Oylik statistika"], ["Sozlamalar"]]
+            if (findUser.dataValues?.role === 'admin') {
+                keyboard = [["Barcha ovozlar"], ["Ovoz qo'shish", "Haftalik statistika"], ["Kunlik statistika", "Oylik statistika"], ["Sozlamalar"]]
             } else if (findUser.dataValues.role === 'user') {
-                keyboard = [["Top audiolar"], ["Ovoz qo'shish", "Biz haqimizda"]]
+                keyboard = [["Barcha ovozlar"], ["Ovoz qo'shish", "Biz haqimizda"]]
             }
 
 
@@ -95,8 +95,14 @@ export default class Commands {
     static async addVoice(bot, db, message) {
         try {
             let DATA = {}
-            if (message.text === '/ovoz' && message.chat.type === 'private') {
+            let getUser = await db.users.findOne({
+                where: {
+                    user_id: `${message.chat.id}`
+                },
+                raw: true
+            })
 
+            if (message.text === "Ovoz qo'shish" && message.chat.type === 'private' && (getUser.role === 'admin' || getUser.role === 'moderator')) {
                 await bot.sendMessage(message.chat.id, 'Audio jonating')
                 await db.users.update({
                     step: 2
@@ -170,9 +176,9 @@ export default class Commands {
                 })
 
                 let voice = await db.audios.create({
-                    file_id: "AwACAgQAAxkBAAIyRWEg96945NN8ic3Q9lHbxXwZ7ShhAAJ2AgACj0wcUN7_NNzceStLIAQ",
-                    name: "akang kuchaydi",
-                    tags: ["akang", "kuchaydi"]
+                    file_id: "AwACAgIAAxkBAAIzhWEhg9Smj0FMwM7gJoKx2-YgntZnAAIuDwACUgUBSVFlzQ2UbD_QIAQ",
+                    name: "bir ikki uch",
+                    tags: ["bir", "ikki"]
                 })
 
                 await bot.sendMessage(message.chat.id, "Ovoz qo'shildi")
@@ -192,11 +198,12 @@ export default class Commands {
                 raw: true
             })
 
-            console.log(user)
+            let firstWord = '', nextWord = ''
 
-            let firstWord = message.text.replace(/ .*/, "");
-            let nextWord = message.text.replace(/^\S+\s+/, "");
-
+            if (message.text) {
+                firstWord = message.text.replace(/ .*/, "");
+                nextWord = message.text.replace(/^\S+\s+/, "");
+            }
             if (Number(nextWord) !== Number(message.from.id)) {
                 if (firstWord === '/newmoderator' && user.role === 'admin') {
                     let user = await db.users.findOne({
@@ -275,7 +282,7 @@ export default class Commands {
                 await bot.sendMessage(message.chat.id, "O'zingizni o'zgartira olmaysiz!")
             }
 
-            if (firstWord === '/getadmins' && user.role === 'admin') {
+            if (firstWord === 'Adminlar' && user.role === 'admin') {
                 let admins = await db.users.findAll({
                     where: {
                         [Op.or]: [
@@ -286,11 +293,11 @@ export default class Commands {
                     raw: true
                 })
 
-                console.log(admins)
+                let text = admins.map(admin => (`<b>${admin.name}</b> (${admin.role}) - ${admin.user_id}\n`));
 
-                let text = admins.map(admin => (`${admin.name} (${admin.role})\n`));
-
-                await bot.sendMessage(message.chat.id, text.join(''))
+                await bot.sendMessage(message.chat.id, text.join(''), {
+                    parse_mode: "HTML"
+                })
             }
         } catch (e) {
             console.log(e)
@@ -299,8 +306,58 @@ export default class Commands {
 
     static async getVoices(bot, db, message) {
         try {
-            if (message.text.toLowerCase() === 'barcha ovozlar') {
-                await bot.sendMessage(message.chat.id, 'barcha ovozlar')
+            if (message.text?.toLowerCase() === 'barcha ovozlar') {
+                let voices = await db.audios.findAll({raw: true})
+                let text = voices.map(voice => (`/${voice.id}. ${voice.name} - (12)\n`));
+                await bot.sendMessage(message.chat.id, text.join(''), {
+                    parse_mode: "HTML"
+                })
+            }
+
+            let messageText = message?.text.replace(/\\/g, '') || ''
+            let isContainsSlash = (message?.text.split(/(?!$)/u))[0] === '/'
+
+            if (typeof Number(messageText) === 'number' && isContainsSlash) {
+                await bot.sendMessage(message.chat.id, 'ovoz keladi')
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async manageSettings(bot, db, message) {
+        try {
+            let user = await db.users.findOne({
+                where: {
+                    user_id: `${message.chat.id}`
+                },
+                raw: true
+            })
+
+            if (message.text === 'Sozlamalar' && user.role === 'admin') {
+                let keyboard = [["Adminlar", "Adminlikdan olish"], ["Admin tayinlash", "Moderator tayinlash"], ["⬅️Ortga"]]
+                await bot.sendMessage(message.chat.id, 'sozlamalar ochildi', {
+                    parse_mode: "HTML",
+                    reply_markup: {
+                        resize_keyboard: true,
+                        keyboard
+                    }
+                })
+            }
+
+            if (message.text === 'Adminlikdan olish' && user.role === 'admin') {
+                await bot.sendMessage(message.chat.id, `Foydalanuvchini adminstratorlar qatoridan chiqarish uchun\n/removeadmin <code>user_id</code>\nbuyrug'idan foydalaning.\nMisol uchun:\n/removeadmin 1234567890`, {
+                    parse_mode: "HTML"
+                })
+            } else if (message.text === 'Admin tayinlash' && user.role === 'admin') {
+                await bot.sendMessage(message.chat.id, `Admin tayinlash uchun\n/newadmin <code>user_id</code>\nbuyrug'idan foydalaning.\nMisol uchun:\n/newadmin 1234567890`, {
+                    parse_mode: "HTML"
+                })
+            } else if (message.text === 'Moderator tayinlash' && user.role === 'admin') {
+                await bot.sendMessage(message.chat.id, `Moderator tayinlash uchun\n/newmoderator <code>user_id</code>\nbuyrug'idan foydalaning.\nMisol uchun:\n/newmoderator 1234567890`, {
+                    parse_mode: "HTML"
+                })
             }
         } catch (e) {
             console.log(e)
