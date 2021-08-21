@@ -18,6 +18,6 @@ bot.on('message', async (message) => {
         await Commands.newVoice(bot, db, message)
 
     } catch (e) {
-        await bot.sendMessage(e)
+        console.log(e)
     }
 })

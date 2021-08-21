@@ -12,8 +12,6 @@ export default class Commands {
         }
     }
     static async newVoice(bot, db, message) {
-        if (message.text === "ovoz" && message.chat.type === 'private') {
-            await Command.addVoice(bot, db, message)
-        }
+        await Command.addVoice(bot, db, message)
     }
 }

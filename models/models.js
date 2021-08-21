@@ -35,7 +35,7 @@ export default class Models {
             },
             name: {
                 type: Sequelize.DataTypes.STRING,
-                allowNull: false,
+                allowNull: true,
             },
             tags: {
                 type: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.STRING),
