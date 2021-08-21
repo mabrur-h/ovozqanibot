@@ -16,6 +16,8 @@ bot.on('message', async (message) => {
         await Commands.botStart(bot, db, message)
         await Commands.botRandom(bot, db, message)
         await Commands.newVoice(bot, db, message)
+        await Commands.newAdmin(bot, db, message)
+        await Commands.getAudios(bot, db, message)
 
     } catch (e) {
         console.log(e)

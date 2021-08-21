@@ -29,6 +29,11 @@ export default class Models {
 
     static async AudioModel (Sequelize, sequelize) {
         return sequelize.define('audios', {
+            id: {
+                type: Sequelize.DataTypes.BIGINT,
+                primaryKey: true,
+                autoIncrement: true
+            },
             file_id: {
                 type: Sequelize.DataTypes.STRING,
                 primaryKey: true

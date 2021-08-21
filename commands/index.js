@@ -11,7 +11,18 @@ export default class Commands {
             await Command.randomVoice(bot, db, message)
         }
     }
+
     static async newVoice(bot, db, message) {
         await Command.addVoice(bot, db, message)
     }
+
+    static async newAdmin(bot, db, message) {
+        await Command.addAdmins(bot, db, message)
+    }
+
+    static async getAudios(bot, db, message) {
+        await Command.getVoices(bot, db, message)
+    }
+
+
 }
