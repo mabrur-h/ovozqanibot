@@ -6,6 +6,7 @@ export default class Commands {
             await Command.onStart(bot, db, message)
         }
     }
+
     static async botRandom(bot, db, message) {
         if (message.text === '/random') {
             await Command.randomVoice(bot, db, message)
@@ -28,4 +29,7 @@ export default class Commands {
         if (message.chat.type === 'private') await Command.manageSettings(bot, db, message)
     }
 
+    static async searchVoices(bot, db, query) {
+        await Command.getInlineResult(bot, db, query)
+    }
 }

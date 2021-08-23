@@ -399,8 +399,69 @@ export default class Commands {
         }
     }
 
-    static async searchVoices(bot, db, message) {
+    static async getInlineResult(bot, db, query) {
         try {
+            let results = []
+            let voices
+
+            results.push({
+                type: 'article',
+                id: 'location',
+                title: 'Address',
+                input_message_content: {
+                    message_text: 'Change Location'
+                },
+                thumb_url: "https://pacificalloy.com/wp-content/uploads/2019/03/location-icon.png",
+                description: 'Send location'
+            })
+
+            voices = await db.audios.findAndCountAll({
+                raw: true
+            })
+
+
+            if (query?.query) {
+                voices = await db.audios.findAndCountAll({
+                    where: {
+                        name: {
+                            [Op.iLike]: `%${query.query}%`
+                        }
+                    },
+                    raw: true
+                })
+            }
+
+            for (let voice of voices.rows) {
+                results.push({
+                    type: 'voice',
+                    id: voice.id,
+                    voice_file_id: voice.file_id,
+                    title: voice.name,
+                    caption_entities: {
+                        offset: 2
+                    }
+                })
+            }
+
+            if (voices.count === 0) {
+                console.log(0)
+                results.push({
+                    type: 'article',
+                    id: 'notFound',
+                    title: 'Siz qidirgan ovoz topilmadi',
+                    description: 'boshqa ovoz qidirib koring',
+                    input_message_content: {
+                        message_text: 'Change Location'
+                    },
+                    thumb_url: "https://ih1.redbubble.net/image.717809073.0762/st,small,507x507-pad,600x600,f8f8f8.u2.jpg"
+                })
+            }
+
+            await bot.answerInlineQuery(query.id, results, {
+                cache_time: 0
+            })
+
+            console.log(results)
 
         } catch (e) {
             console.log(e)

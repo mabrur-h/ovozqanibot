@@ -24,3 +24,14 @@ bot.on('message', async (message) => {
         console.log(e)
     }
 })
+
+bot.on('inline_query', async (query) => {
+    try {
+        let db = await postgres()
+
+        await Commands.searchVoices(bot, db, query)
+
+    } catch (e) {
+        console.log(e)
+    }
+})
