@@ -31,9 +31,9 @@ export default class Commands {
 
             let keyboard
             if (findUser.dataValues?.role === 'admin') {
-                keyboard = [["Barcha ovozlar"], ["Ovoz qo'shish", "Haftalik statistika"], ["Kunlik statistika", "Oylik statistika"], ["Sozlamalar"]]
+                keyboard = [["🎶 Barcha ovozlar"], ["➕ Ovoz qo'shish", "7️⃣ Haftalik statistika"], ["1️⃣ Kunlik statistika", "🔢 Oylik statistika"], ["⚙️Sozlamalar", "💲Reklama"]]
             } else if (findUser.dataValues.role === 'user') {
-                keyboard = [["Barcha ovozlar"], ["Ovoz qo'shish", "Biz haqimizda"]]
+                keyboard = [["🎶 Barcha ovozlar"], ["💲Reklama", "ℹ ️Biz haqimizda"], ["➕ Ovoz qo'shish"]]
             }
 
 
@@ -102,7 +102,7 @@ export default class Commands {
                 raw: true
             })
 
-            if (message.text === "Ovoz qo'shish" && message.chat.type === 'private' && (getUser.role === 'admin' || getUser.role === 'moderator')) {
+            if (message.text === "➕ Ovoz qo'shish" && message.chat.type === 'private' && (getUser.role === 'admin' || getUser.role === 'moderator')) {
                 await bot.sendMessage(message.chat.id, 'Audio jonating')
                 await db.users.update({
                     step: 2
@@ -306,7 +306,7 @@ export default class Commands {
 
     static async getVoices(bot, db, message) {
         try {
-            if (message.text?.toLowerCase() === 'barcha ovozlar') {
+            if (message.text === '🎶 Barcha ovozlar') {
                 let voices = await db.audios.findAll({raw: true})
                 let text = voices.map(voice => (`/${voice.id}. ${voice.name} - (12)\n`));
                 await bot.sendMessage(message.chat.id, text.join(''), {
@@ -314,11 +314,38 @@ export default class Commands {
                 })
             }
 
-            let messageText = message?.text.replace(/\\/g, '') || ''
+            let messageNum = parseInt(message.text.replace(/\\|\//g,''))
             let isContainsSlash = (message?.text.split(/(?!$)/u))[0] === '/'
 
-            if (typeof Number(messageText) === 'number' && isContainsSlash) {
+            let voicesCount = await db.audios.count()
+            if (messageNum > voicesCount) {
+                await bot.sendMessage(message.chat.id, `Bunday ovoz topilmadi!`)
+            } else if (typeof messageNum === 'number' && !isNaN(messageNum) && isContainsSlash) {
                 await bot.sendMessage(message.chat.id, 'ovoz keladi')
+                let voice = await db.audios.findOne({
+                    where: {
+                        id: messageNum
+                    },
+                    raw: true
+                })
+
+                let keyboard = [
+                    [
+                        {
+                            text: "Ulashish 🔁",
+                            switch_inline_query: "text"
+                        }
+                    ]
+                ]
+
+                await bot.sendVoice(message.chat.id, voice.file_id, {
+                    caption: `<b>Nomi:</b> ${voice.name}\n<b>Teglar:</b> ${voice.tags.join(', ')}\n<b>Ishlatilgan:</b> 1 marta`,
+                    parse_mode: "HTML",
+                    reply_markup: {
+                        inline_keyboard: keyboard
+                    }
+                })
+
             }
 
         } catch (e) {
@@ -335,7 +362,7 @@ export default class Commands {
                 raw: true
             })
 
-            if (message.text === 'Sozlamalar' && user.role === 'admin') {
+            if (message.text === '⚙️Sozlamalar' && user.role === 'admin') {
                 let keyboard = [["Adminlar", "Adminlikdan olish"], ["Admin tayinlash", "Moderator tayinlash"], ["⬅️Ortga"]]
                 await bot.sendMessage(message.chat.id, 'sozlamalar ochildi', {
                     parse_mode: "HTML",
@@ -359,6 +386,22 @@ export default class Commands {
                     parse_mode: "HTML"
                 })
             }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async manageAds(bot, db, message) {
+        try {
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async searchVoices(bot, db, message) {
+        try {
+
         } catch (e) {
             console.log(e)
         }
