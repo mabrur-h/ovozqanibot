@@ -333,7 +333,7 @@ export default class Commands {
                     [
                         {
                             text: "Ulashish 🔁",
-                            switch_inline_query: "text"
+                            switch_inline_query: `${voice.name}`
                         }
                     ]
                 ]
@@ -407,12 +407,25 @@ export default class Commands {
             results.push({
                 type: 'article',
                 id: 'location',
-                title: 'Address',
+                title: '@mabrur_dev',
+                thumb_url: "https://telegra.ph/file/8246dc63fd15e6f8776fc.jpg",
+                description: '💻 Dasturlashga va muallifning hayotiga oid blog',
                 input_message_content: {
-                    message_text: 'Change Location'
+                    message_text: 'Change Location\n@ovozqanirobot ',
+                    parse_mode: "HTML"
                 },
-                thumb_url: "https://pacificalloy.com/wp-content/uploads/2019/03/location-icon.png",
-                description: 'Send location'
+                reply_markup: {
+                    "inline_keyboard": [
+                        [{
+                            "text": "InlineFeatures.",
+                            "url": "https://www.fcb.uz"
+                        }],
+                        [{
+                            "text": "OtherFeatures.",
+                            "url": "https://www.fcb.uz"
+                        }]
+                    ]
+                }
             })
 
             voices = await db.audios.findAndCountAll({
@@ -444,24 +457,17 @@ export default class Commands {
             }
 
             if (voices.count === 0) {
-                console.log(0)
-                results.push({
-                    type: 'article',
-                    id: 'notFound',
-                    title: 'Siz qidirgan ovoz topilmadi',
-                    description: 'boshqa ovoz qidirib koring',
-                    input_message_content: {
-                        message_text: 'Change Location'
-                    },
-                    thumb_url: "https://ih1.redbubble.net/image.717809073.0762/st,small,507x507-pad,600x600,f8f8f8.u2.jpg"
+                await bot.answerInlineQuery(query.id, results, {
+                    cache_time: 0,
+                    is_personal: true,
+                    switch_pm_text: "Ovoz taklif qilish",
+                    switch_pm_parameter: "convert"
+                })
+            } else {
+                await bot.answerInlineQuery(query.id, results, {
+                    cache_time: 0
                 })
             }
-
-            await bot.answerInlineQuery(query.id, results, {
-                cache_time: 0
-            })
-
-            console.log(results)
 
         } catch (e) {
             console.log(e)
