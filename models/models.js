@@ -54,4 +54,38 @@ export default class Models {
         })
     }
 
+    static async InlineAdsModel (Sequelize, sequelize) {
+        return sequelize.define('inline_ads', {
+            uuid: {
+                type: Sequelize.DataTypes.UUID,
+                primaryKey: true,
+                defaultValue: Sequelize.DataTypes.UUIDV4()
+            },
+            title: {
+                type: Sequelize.DataTypes.STRING,
+                allowNull: true,
+            },
+            thumb_url: {
+                type: Sequelize.DataTypes.STRING,
+                allowNull: true
+            },
+            description: {
+                type: Sequelize.DataTypes.STRING,
+                allowNull: true,
+            },
+            message_text: {
+                type: Sequelize.DataTypes.STRING,
+                allowNull: true
+            },
+            keyboard: {
+                type: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.STRING),
+                allowNull: true
+            },
+            isActive: {
+                type: Sequelize.DataTypes.BOOLEAN,
+                defaultValue: false
+            }
+        })
+    }
+
 }

@@ -123,6 +123,12 @@ export default class Commands {
             if (user.step === 2 && message.voice) {
                 DATA.file_id = message.voice.file_id
 
+                // await db.audios.create({
+                //     file_id: message.voice.file_id,
+                //     name: null,
+                //     tags: null
+                // })
+
                 let findVoice = await db.audios.findOne({
                     where: {
                         file_id: message.voice.file_id
@@ -189,15 +195,8 @@ export default class Commands {
         }
     }
 
-    static async addAdmins(bot, db, message) {
+    static async addAdmins(bot, db, message, user) {
         try {
-            let user = await db.users.findOne({
-                where: {
-                    user_id: `${message.chat.id}`
-                },
-                raw: true
-            })
-
             let firstWord = '', nextWord = ''
 
             if (message.text) {
@@ -308,14 +307,18 @@ export default class Commands {
         try {
             if (message.text === '🎶 Barcha ovozlar') {
                 let voices = await db.audios.findAll({raw: true})
-                let text = voices.map(voice => (`/${voice.id}. ${voice.name} - (12)\n`));
+                let text = voices.map(voice => (`/${voice.id}. ${voice.name} - 12 \n`));
                 await bot.sendMessage(message.chat.id, text.join(''), {
                     parse_mode: "HTML"
                 })
             }
 
-            let messageNum = parseInt(message.text.replace(/\\|\//g,''))
-            let isContainsSlash = (message?.text.split(/(?!$)/u))[0] === '/'
+            let messageNum, isContainsSlash
+
+            if (message?.text) {
+                messageNum = parseInt(message.text?.replace(/\\|\//g,''))
+                isContainsSlash = (message.text?.split(/(?!$)/u))[0] === '/'
+            }
 
             let voicesCount = await db.audios.count()
             if (messageNum > voicesCount) {
@@ -353,17 +356,10 @@ export default class Commands {
         }
     }
 
-    static async manageSettings(bot, db, message) {
+    static async manageSettings(bot, db, message, user) {
         try {
-            let user = await db.users.findOne({
-                where: {
-                    user_id: `${message.chat.id}`
-                },
-                raw: true
-            })
-
             if (message.text === '⚙️Sozlamalar' && user.role === 'admin') {
-                let keyboard = [["Adminlar", "Adminlikdan olish"], ["Admin tayinlash", "Moderator tayinlash"], ["⬅️Ortga"]]
+                let keyboard = [["Adminlar", "Adminlikdan olish"], ["Admin tayinlash", "Moderator tayinlash"], ["🧾 Inline reklama", "🧾 Start reklama"], ["⬅️Ortga"]]
                 await bot.sendMessage(message.chat.id, 'sozlamalar ochildi', {
                     parse_mode: "HTML",
                     reply_markup: {
@@ -391,7 +387,35 @@ export default class Commands {
         }
     }
 
-    static async manageAds(bot, db, message) {
+    static async manageInlineAds(bot, db, message, user) {
+        try {
+            let inlineAds
+            if (user.step === 5) {
+                if (message.text) {
+                    inlineAds = await db.inline_ads.create({
+                        title: message.text
+                    })
+                    await db.users.update({
+                        step: 6
+                    }, {
+                        where: {
+                            user_id: user.user_id
+                        }
+                    })
+                    await bot.sendMessage(message.chat.id, `Rasm URLini yuboring`)
+                } else {
+                    await bot.sendMessage(message.chat.id, `Matn formatida yuboring!`)
+                }
+            } else if (user.step === 6) {
+                console.log("Inline", inlineAds)
+            }
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async manageStartAds(bot, db, message, user) {
         try {
 
         } catch (e) {
@@ -406,12 +430,12 @@ export default class Commands {
 
             results.push({
                 type: 'article',
-                id: 'location',
+                id: 'ads',
                 title: '@mabrur_dev',
                 thumb_url: "https://telegra.ph/file/8246dc63fd15e6f8776fc.jpg",
                 description: '💻 Dasturlashga va muallifning hayotiga oid blog',
                 input_message_content: {
-                    message_text: 'Change Location\n@ovozqanirobot ',
+                    message_text: '<b>Dasturlashga oid kanal</b> - https://t.me/joinchat/R8o33ro6_QV0ltz6',
                     parse_mode: "HTML"
                 },
                 reply_markup: {
@@ -450,9 +474,7 @@ export default class Commands {
                     id: voice.id,
                     voice_file_id: voice.file_id,
                     title: voice.name,
-                    caption_entities: {
-                        offset: 2
-                    }
+                    caption: voice.name
                 })
             }
 
@@ -465,7 +487,10 @@ export default class Commands {
                 })
             } else {
                 await bot.answerInlineQuery(query.id, results, {
-                    cache_time: 0
+                    cache_time: 0,
+                    is_personal: true,
+                    switch_pm_text: "Barcha ovozlarni ko'rish",
+                    switch_pm_parameter: "convert"
                 })
             }
 
