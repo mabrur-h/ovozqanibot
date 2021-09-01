@@ -14,6 +14,8 @@ async function postgres () {
         db.audios = await Models.AudioModel(Sequelize, sequelize)
         db.inline_ads = await Models.InlineAdsModel(Sequelize, sequelize)
 
+        console.log(db)
+
         await sequelize.sync({force: false})
         return db
 

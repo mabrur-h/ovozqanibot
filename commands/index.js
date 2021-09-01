@@ -13,8 +13,8 @@ export default class Commands {
         }
     }
 
-    static async newVoice(bot, db, message) {
-        if (message.chat.type === 'private') await Command.addVoice(bot, db, message)
+    static async newVoice(bot, db, message, user) {
+        if (message.chat.type === 'private') await Command.addVoice(bot, db, message, user)
     }
 
     static async newAdmin(bot, db, message, user) {
@@ -34,19 +34,56 @@ export default class Commands {
     }
 
     static async adsController(bot, db, message, user) {
-        if (message.chat.type === 'private' && message.text === '🧾 Inline reklama' && user.role === 'admin') {
+        if (message.chat.type === 'private' && user?.role === 'admin') {
             await Command.manageInlineAds(bot, db, message, user)
-            await db.users.update({
-                step: 5
-            }, {
-                where: {
-                    user_id: `${message.chat.id}`
-                }
-            })
-            await bot.sendMessage(message.chat.id, `Inline reklama uchun sarlavha yuboring.`)
         }
         if (message.chat.type === 'private' && message.text === '🧾 Start reklama' && user.role === 'admin') {
             await Command.manageStartAds(bot, db, message, user)
+        }
+    }
+
+    static async callbackQueryController (bot, db, query) {
+        if (query?.data === 'deleteInlineAds') {
+            try {
+                await db.inline_ads.destroy({
+                    where: {},
+                    truncate: true
+                })
+
+                await bot.sendMessage(query.message.chat.id, `Barcha reklamalar o'chirildi!`)
+            } catch (e) {
+                console.log()
+            }
+        } else if (query?.data === 'activateAds') {
+            try {
+                await db.inline_ads.update({
+                    isActive: true
+                }, {
+                    where: {
+                        uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                    }
+                })
+                await bot.sendMessage(query.message.chat.id, `Aktivlashtirildi!`)
+            } catch (e) {
+                console.log(e)
+            }
+        } else if (query?.data === 'deleteLastAds') {
+            try {
+                let ads = await db.inline_ads.findOne({
+                    order: [ [ 'createdAt', 'DESC' ]],
+                    raw: true
+                })
+
+                await db.inline_ads.destroy({
+                    where: {
+                        uuid: ads.uuid
+                    }
+                })
+
+                await bot.sendMessage(query.message.chat.id, `So'ngi reklama o'chirildi!`)
+            } catch (e) {
+                console.log(e)
+            }
         }
     }
 }

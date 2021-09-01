@@ -23,6 +23,10 @@ export default class Models {
                 type: Sequelize.DataTypes.INTEGER,
                 allowNull: false,
                 defaultValue: 0
+            },
+            activeID: {
+                type: Sequelize.DataTypes.STRING,
+                allowNull: true
             }
         })
     }
@@ -46,10 +50,12 @@ export default class Models {
             name: {
                 type: Sequelize.DataTypes.STRING,
                 allowNull: true,
+                defaultValue: 'name'
             },
             tags: {
                 type: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.STRING),
-                allowNull: true
+                allowNull: true,
+                defaultValue: ['tag']
             }
         })
     }

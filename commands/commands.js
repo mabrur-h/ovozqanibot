@@ -92,17 +92,10 @@ export default class Commands {
         }
     }
 
-    static async addVoice(bot, db, message) {
+    static async addVoice(bot, db, message, user) {
         try {
-            let DATA = {}
-            let getUser = await db.users.findOne({
-                where: {
-                    user_id: `${message.chat.id}`
-                },
-                raw: true
-            })
 
-            if (message.text === "➕ Ovoz qo'shish" && message.chat.type === 'private' && (getUser.role === 'admin' || getUser.role === 'moderator')) {
+            if (message.text === "➕ Ovoz qo'shish" && message.chat.type === 'private' && (user.role === 'admin' || user.role === 'moderator')) {
                 await bot.sendMessage(message.chat.id, 'Audio jonating')
                 await db.users.update({
                     step: 2
@@ -113,36 +106,30 @@ export default class Commands {
                 })
             }
 
-            let user = await db.users.findOne({
-                where: {
-                    user_id: `${message.from.id}`
-                },
-                raw: true
-            })
-
             if (user.step === 2 && message.voice) {
-                DATA.file_id = message.voice.file_id
-
-                // await db.audios.create({
-                //     file_id: message.voice.file_id,
-                //     name: null,
-                //     tags: null
-                // })
 
                 let findVoice = await db.audios.findOne({
                     where: {
                         file_id: message.voice.file_id
                     }
                 })
-                if (!findVoice) {
 
+                if (!findVoice) {
                     await db.users.update({
-                        step: 3
+                        step: 3,
+                        activeID: message.voice.file_id
                     }, {
                         where: {
                             user_id: `${message.from.id}`
                         }
                     })
+
+                    await db.audios.create({
+                        file_id: message.voice.file_id,
+                        name: 'ovozqani',
+                        tags: ['ovozqani']
+                    })
+
                     await bot.sendMessage(message.chat.id, "Ovoz nomini yozing")
                 } else {
                     await bot.sendMessage(message.chat.id, "Bu ovoz oldin qo'shilgan")
@@ -158,38 +145,48 @@ export default class Commands {
             }
 
             if (user.step === 3 && message.text) {
-                DATA.name = message.text
+
+                await db.audios.update({
+                    name: message.text
+                }, {
+                    where: {
+                        file_id: user.activeID
+                    }
+                })
 
                 await db.users.update({
                     step: 4
                 }, {
                     where: {
-                        user_id: `${message.from.id}`
+                        user_id: user.user_id
                     }
                 })
                 await bot.sendMessage(message.chat.id, "Ovoz teglarini yozing")
             }
 
             if (user.step === 4 && message.text) {
-                DATA.tags = message.text.split(" ")
+
+                await db.audios.update({
+                    tags: message.text.split(" ")
+                }, {
+                    where: {
+                        file_id: user.activeID
+                    }
+                })
 
                 await db.users.update({
-                    step: 1
+                    step: 1,
+                    activeID: null
                 }, {
                     where: {
                         user_id: `${message.from.id}`
                     }
                 })
 
-                let voice = await db.audios.create({
-                    file_id: "AwACAgIAAxkBAAIzhWEhg9Smj0FMwM7gJoKx2-YgntZnAAIuDwACUgUBSVFlzQ2UbD_QIAQ",
-                    name: "bir ikki uch",
-                    tags: ["bir", "ikki"]
-                })
-
                 await bot.sendMessage(message.chat.id, "Ovoz qo'shildi")
             }
-            console.log(DATA)
+
+            console.log(user)
         } catch (e) {
             console.log(e)
         }
@@ -389,12 +386,25 @@ export default class Commands {
 
     static async manageInlineAds(bot, db, message, user) {
         try {
+            if (message.text === '🧾 Inline reklama') {
+                await db.users.update({
+                    step: 5
+                }, {
+                    where: {
+                        user_id: `${message.chat.id}`
+                    }
+                })
+                await bot.sendMessage(message.chat.id, `Inline reklama uchun sarlavha yuboring.`)
+            }
             let inlineAds
             if (user.step === 5) {
                 if (message.text) {
                     inlineAds = await db.inline_ads.create({
                         title: message.text
                     })
+
+                    console.log(inlineAds)
+
                     await db.users.update({
                         step: 6
                     }, {
@@ -402,12 +412,113 @@ export default class Commands {
                             user_id: user.user_id
                         }
                     })
-                    await bot.sendMessage(message.chat.id, `Rasm URLini yuboring`)
+                    await bot.sendMessage(message.chat.id, `Rasm URLini yuboring!`)
                 } else {
                     await bot.sendMessage(message.chat.id, `Matn formatida yuboring!`)
                 }
             } else if (user.step === 6) {
-                console.log("Inline", inlineAds)
+                if (message.text) {
+                    await db.inline_ads.update({
+                        thumb_url: message?.text
+                    }, {
+                        where: {
+                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                        }
+                    })
+                    await db.users.update({
+                        step: 7
+                    }, {
+                        where: {
+                            user_id: `${user.user_id}`
+                        }
+                    })
+                    await bot.sendMessage(message.chat.id, `Description yuboring!`)
+                } else {
+                    await bot.sendMessage(message.chat.id, `Matn ko'rinishida yuboring!`)
+                }
+            } else if (user.step === 7) {
+                if (message.text) {
+                    await db.inline_ads.update({
+                        description: message.text
+                    }, {
+                        where: {
+                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                        }
+                    })
+                    await db.users.update({
+                        step: 8
+                    }, {
+                        where: {
+                            user_id: `${user.user_id}`
+                        }
+                    })
+                    await bot.sendMessage(message.chat.id, `Bosilganda chiqadigan mattni yuboring!`)
+                } else {
+                    await bot.sendMessage(message.chat.id, `Matn ko'rinishida yuboring!`)
+                }
+            } else if (user.step === 8) {
+                if (message.text) {
+                    await db.inline_ads.update({
+                        message_text: message.text
+                    }, {
+                        where: {
+                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                        }
+                    })
+                    await db.users.update({
+                        step: 9
+                    }, {
+                        where: {
+                            user_id: `${user.user_id}`
+                        }
+                    })
+                    await bot.sendMessage(message.chat.id, `Xabar tagidagi knopkalarni yuboring!`)
+                } else {
+                    await bot.sendMessage(message.chat.id, `Matn ko'rinishida yuboring!`)
+                }
+            } else if (user.step === 9) {
+                if (message.text) {
+                    await db.inline_ads.update({
+                        keyboard: [message.text]
+                    }, {
+                        where: {
+                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                        }
+                    })
+                    await db.users.update({
+                        step: 1
+                    }, {
+                        where: {
+                            user_id: `${user.user_id}`
+                        }
+                    })
+                    let keyboard = [
+                        [
+                            {
+                                text: "Aktivlashtirish ✅",
+                                callback_data: `activateAds`
+                            },
+                            {
+                                text: "Barchasini o'chirish ❌",
+                                callback_data: `deleteInlineAds`
+                            }
+                        ],
+                        [
+                            {
+                                text: "Oxirgisini o'chirish ❌",
+                                callback_data: `deleteLastAds`
+                            }
+                        ]
+                    ]
+                    await bot.sendMessage(message.chat.id, `Reklama muvaffaqiyatli yaratildi!`, {
+                        parse_mode: "HTML",
+                        reply_markup: {
+                            inline_keyboard: keyboard
+                        }
+                    })
+                } else {
+                    await bot.sendMessage(message.chat.id, `Matn ko'rinishida yuboring!`)
+                }
             }
 
         } catch (e) {
@@ -428,29 +539,39 @@ export default class Commands {
             let results = []
             let voices
 
-            results.push({
-                type: 'article',
-                id: 'ads',
-                title: '@mabrur_dev',
-                thumb_url: "https://telegra.ph/file/8246dc63fd15e6f8776fc.jpg",
-                description: '💻 Dasturlashga va muallifning hayotiga oid blog',
-                input_message_content: {
-                    message_text: '<b>Dasturlashga oid kanal</b> - https://t.me/joinchat/R8o33ro6_QV0ltz6',
-                    parse_mode: "HTML"
+            let inlineAd = await db.inline_ads.findOne({
+                where: {
+                    isActive: true
                 },
-                reply_markup: {
-                    "inline_keyboard": [
-                        [{
-                            "text": "InlineFeatures.",
-                            "url": "https://www.fcb.uz"
-                        }],
-                        [{
-                            "text": "OtherFeatures.",
-                            "url": "https://www.fcb.uz"
-                        }]
-                    ]
-                }
+                order: [ [ 'createdAt', 'DESC' ]],
+                raw: true
             })
+
+            if (inlineAd) {
+                results.push({
+                    type: 'article',
+                    id: `${inlineAd.uuid}`,
+                    title: `${inlineAd.title}`,
+                    thumb_url: `${inlineAd.thumb_url}`,
+                    description: `${inlineAd.description}`,
+                    input_message_content: {
+                        message_text: `${inlineAd.message_text}`,
+                        parse_mode: "HTML"
+                    },
+                    // reply_markup: {
+                    //     "inline_keyboard": [
+                    //         [{
+                    //             "text": "InlineFeatures.",
+                    //             "url": "https://www.fcb.uz"
+                    //         }],
+                    //         [{
+                    //             "text": "OtherFeatures.",
+                    //             "url": "https://www.fcb.uz"
+                    //         }]
+                    //     ]
+                    // }
+                })
+            }
 
             voices = await db.audios.findAndCountAll({
                 raw: true
@@ -482,7 +603,7 @@ export default class Commands {
                 await bot.answerInlineQuery(query.id, results, {
                     cache_time: 0,
                     is_personal: true,
-                    switch_pm_text: "Ovoz taklif qilish",
+                    switch_pm_text: "Ovoz topilmadi! Taklif qilish",
                     switch_pm_parameter: "convert"
                 })
             } else {
@@ -498,5 +619,4 @@ export default class Commands {
             console.log(e)
         }
     }
-
 }
