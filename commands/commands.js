@@ -3,7 +3,7 @@ const { Op } = pkg
 
 export default class Commands {
 
-    static async onStart(bot, db, message) {
+    static async onStart(bot, db, message, config) {
         try {
             let findUser = await db.users.findOne({
                 where: {
@@ -18,7 +18,6 @@ export default class Commands {
                         user_id: `${message.from.id}`
                     }
                 })
-                await bot.sendMessage(message.chat.id, 'user found')
             } else {
                 let user = await db.users.create({
                     user_id: message.from.id,
@@ -26,19 +25,22 @@ export default class Commands {
                     username: message.from.username,
                     step: 1
                 })
-                await bot.sendMessage(message.chat.id, `successfully registered`)
             }
 
             let keyboard
             if (findUser?.dataValues?.role === 'admin') {
                 keyboard = [["🎶 Barcha ovozlar"], ["➕ Ovoz qo'shish", "7️⃣ Haftalik statistika"], ["1️⃣ Kunlik statistika", "🔢 Oylik statistika"], ["⚙️Sozlamalar", "💲Reklama"]]
-            } else if (findUser.dataValues?.role === 'user') {
+            } else if (findUser?.dataValues?.role === 'user') {
                 keyboard = [["🎶 Barcha ovozlar"], ["💲Reklama", "ℹ ️Biz haqimizda"], ["➕ Ovoz qo'shish"]]
             }
 
+            let startAd = await db.start_ads.findOne({
+                order: [["createdAt", "DESC"]],
+                raw: true
+            })
 
-            await bot.sendMessage(message.chat.id, `Канал - https://t.me/joinchat/UEOeiBLpY5xmNGQy`)
-            await bot.sendMessage(message.chat.id, `Если ты хочешь начать пользоваться ботом, нажми на кнопку`, {
+            await bot.forwardMessage(message.chat.id, config.FORWARD_POST_CHANNEL, startAd?.message_id || 2)
+            await bot.sendMessage(message.chat.id, `Botdan foydalanish uchun pastdagi bo'limlardan birini tanlang`, {
                 parse_mode: "HTML",
                 reply_markup: {
                     resize_keyboard: true,
@@ -159,7 +161,7 @@ export default class Commands {
                     step: 4
                 }, {
                     where: {
-                        user_id: user.user_id
+                        user_id: `${user.user_id}`
                     }
                 })
                 await bot.sendMessage(message.chat.id, "Ovoz teglarini yozing")
@@ -457,7 +459,7 @@ export default class Commands {
                         activeID: inlineAds.uuid
                     }, {
                         where: {
-                            user_id: user.user_id
+                            user_id: `${user.user_id}`
                         }
                     })
                     await bot.sendMessage(message.chat.id, `Rasm URLini yuboring!`)
@@ -586,7 +588,37 @@ export default class Commands {
 
     static async manageStartAds(bot, db, message, user) {
         try {
+            if (message.text === '🧾 Start reklama') {
+                await bot.sendMessage(message.chat.id, `Kerakli postni forward qiling!`)
+                await db.users.update({
+                    step: 14
+                }, {
+                    where: {
+                        user_id: `${user.user_id}`
+                    }
+                })
+            }
 
+            if (user.step === 14 && message?.forward_from_message_id) {
+                let findAds = await db.start_ads.findAll()
+                if (findAds) {
+                    await db.start_ads.destroy({
+                        where: {},
+                        truncate: true
+                    })
+                }
+                await db.start_ads.create({
+                    message_id: message?.forward_from_message_id
+                })
+                await db.users.update({
+                    step: 1
+                }, {
+                    where: {
+                        user_id: `${user.user_id}`
+                    }
+                })
+                await bot.sendMessage(message.chat.id, `Reklama posti yangilandi!`)
+            }
         } catch (e) {
             console.log(e)
         }
@@ -810,7 +842,7 @@ export default class Commands {
                         inline_keyboard: keyboard
                     }
                 })
-            } else if (user.step === 11 && message.text !== '⬅️Ortga') {
+            } else if (user?.step === 11 && message.text !== '⬅️Ortga') {
                 await db.audios.update({
                     name: message?.text || 'ovozqani'
                 }, {
@@ -887,7 +919,7 @@ export default class Commands {
                         inline_keyboard: keyboard
                     }
                 })
-            } else if (user.step === 12 && message.text !== '⬅️Ortga') {
+            } else if (user?.step === 12 && message.text !== '⬅️Ortga') {
                 await db.audios.update({
                     tags: message?.text.split(" ") || ['ovozqani']
                 }, {
@@ -1001,6 +1033,70 @@ export default class Commands {
             }
         } catch (e) {
             console.log(e)
+        }
+    }
+
+    static async mailingUsers(bot, db, message, config, user) {
+        try {
+            if (message?.text === '/mailing' && user.role === 'admin') {
+                await db.users.update({
+                    step: 13
+                }, {
+                    where: {
+                        user_id: `${user.user_id}`
+                    }
+                })
+
+                await bot.sendMessage(message.chat.id, `Yubormoqchi bo'lgan xabaringizni forward qiling.`)
+            }
+
+            if (user.step === 13 && message?.forward_from_message_id) {
+                let interval = (1 / 10) * 1000
+
+                let users = await db.users.findAndCountAll({
+                    attributes: ['user_id'],
+                    raw: true
+                })
+
+                setTimeout(async () => {
+                    let count = 0;
+                    let errorCount = 0
+                    for (let i = 0; i < users.count; i++) {
+                        try {
+                            count += 1
+                            await bot.forwardMessage(users.rows[i].user_id, config.FORWARD_POST_CHANNEL, message?.forward_from_message_id)
+                        } catch (e) {
+                            if (e.response && e.response.statusCode === 403) {
+                                errorCount += 1
+                            }
+                        }
+                    }
+                    await bot.sendMessage(message.chat.id, `<b>Barchaga yuborildi</b>\n\nYuborilgan odamlar soni: ${count}`, {
+                        parse_mode: "HTML"
+                    })
+                    await bot.sendMessage(message.chat.id, `<b>Bloklaganlar:</b> ${errorCount}`, {
+                        parse_mode: "HTML"
+                    })
+
+                }, interval)
+
+
+                await db.users.update({
+                    step: 1
+                }, {
+                    where: {
+                        user_id: `${user.user_id}`
+                    }
+                })
+            }
+        } catch (e) {
+            await db.users.update({
+                step: 1
+            }, {
+                where: {
+                    user_id: `${user?.user_id}`
+                }
+            })
         }
     }
 }

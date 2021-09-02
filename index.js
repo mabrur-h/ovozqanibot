@@ -20,7 +20,7 @@ bot.on('message', async (message) => {
             raw: true
         })
 
-        await Commands.botStart(bot, db, message)
+        await Commands.botStart(bot, db, message, config)
         await Commands.botRandom(bot, db, message)
         await Commands.newVoice(bot, db, message, user)
         await Commands.newAdmin(bot, db, message, user)
@@ -28,6 +28,7 @@ bot.on('message', async (message) => {
         await Commands.changeSettings(bot, db, message, user)
         await Commands.adsController(bot, db, message, user)
         await Commands.editVoiceController(bot, db, message, user)
+        await Commands.mailingController(bot, db, message, config, user)
 
     } catch (e) {
         console.log(e)

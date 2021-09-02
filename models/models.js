@@ -119,6 +119,21 @@ export default class Models {
         })
     }
 
+    static async startAdsModel (Sequelize, sequelize) {
+        return sequelize.define('start_ads', {
+            uuid: {
+                type: Sequelize.DataTypes.UUID,
+                primaryKey: true,
+                defaultValue: Sequelize.DataTypes.UUIDV4()
+            },
+            message_id: {
+                type: Sequelize.DataTypes.INTEGER,
+                allowNull: false,
+                defaultValue: 0
+            }
+        })
+    }
+
     static async voiceCounterModel (Sequelize, sequelize) {
         return sequelize.define('voice_counts', {
             uuid: {

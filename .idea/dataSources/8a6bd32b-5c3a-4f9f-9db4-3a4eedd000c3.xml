@@ -1439,7 +1439,7 @@ true posixrules
 13194||-9223372036854775808|U|G
 13194||10|U|G</Grants>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>12349</IntrospectionStateNumber>
+      <IntrospectionStateNumber>12447</IntrospectionStateNumber>
       <Current>1</Current>
       <Relations>sequence|table|112341|112343|2
 </Relations>
@@ -1571,7 +1571,7 @@ true posixrules
       <Comment>standard public schema</Comment>
       <StateNumber>275</StateNumber>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>12350</IntrospectionStateNumber>
+      <IntrospectionStateNumber>12448</IntrospectionStateNumber>
       <Current>1</Current>
     </schema>
     <extension id="42" parent="11" name="plpgsql">
@@ -1695,7 +1695,7 @@ user</Labels>
     <table id="57" parent="41" name="inline_ads">
       <ObjectId>112223</ObjectId>
       <Owner>postgres</Owner>
-      <StateNumber>12216</StateNumber>
+      <StateNumber>12445</StateNumber>
     </table>
     <table id="58" parent="41" name="inline_query_counts">
       <ObjectId>112399</ObjectId>
@@ -1707,24 +1707,29 @@ user</Labels>
       <Owner>postgres</Owner>
       <StateNumber>12305</StateNumber>
     </table>
-    <table id="60" parent="41" name="users">
+    <table id="60" parent="41" name="start_ads">
+      <ObjectId>112405</ObjectId>
+      <Owner>postgres</Owner>
+      <StateNumber>12425</StateNumber>
+    </table>
+    <table id="61" parent="41" name="users">
       <ObjectId>112277</ObjectId>
       <Owner>postgres</Owner>
       <StateNumber>11931</StateNumber>
     </table>
-    <table id="61" parent="41" name="voice_counts">
+    <table id="62" parent="41" name="voice_counts">
       <ObjectId>112393</ObjectId>
       <Owner>postgres</Owner>
       <StateNumber>12328</StateNumber>
     </table>
-    <column id="62" parent="56" name="uuid">
+    <column id="63" parent="56" name="uuid">
       <Position>1</Position>
       <DataType>uuid|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12258</StateNumber>
       <TypeId>2950</TypeId>
     </column>
-    <column id="63" parent="56" name="id">
+    <column id="64" parent="56" name="id">
       <Position>2</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
@@ -1732,56 +1737,56 @@ user</Labels>
       <DefaultExpression>nextval(&apos;audios_id_seq&apos;::regclass)</DefaultExpression>
       <TypeId>20</TypeId>
     </column>
-    <column id="64" parent="56" name="file_id">
+    <column id="65" parent="56" name="file_id">
       <Position>3</Position>
       <DataType>varchar(255)|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12258</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="65" parent="56" name="file_unique_id">
+    <column id="66" parent="56" name="file_unique_id">
       <Position>4</Position>
       <DataType>varchar(255)|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12258</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="66" parent="56" name="name">
+    <column id="67" parent="56" name="name">
       <Position>5</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>12258</StateNumber>
       <DefaultExpression>&apos;name&apos;::character varying</DefaultExpression>
       <TypeId>1043</TypeId>
     </column>
-    <column id="67" parent="56" name="tags">
+    <column id="68" parent="56" name="tags">
       <Position>6</Position>
       <DataType>varchar(255) []|0s</DataType>
       <StateNumber>12258</StateNumber>
       <DefaultExpression>ARRAY[&apos;tag&apos;::character varying(255)]</DefaultExpression>
       <TypeId>1015</TypeId>
     </column>
-    <column id="68" parent="56" name="isActive">
+    <column id="69" parent="56" name="isActive">
       <Position>7</Position>
       <DataType>boolean|0s</DataType>
       <StateNumber>12258</StateNumber>
       <DefaultExpression>true</DefaultExpression>
       <TypeId>16</TypeId>
     </column>
-    <column id="69" parent="56" name="createdAt">
+    <column id="70" parent="56" name="createdAt">
       <Position>8</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12258</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="70" parent="56" name="updatedAt">
+    <column id="71" parent="56" name="updatedAt">
       <Position>9</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12258</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <index id="71" parent="56" name="audios_pkey">
+    <index id="72" parent="56" name="audios_pkey">
       <ObjectId>112353</ObjectId>
       <StateNumber>12258</StateNumber>
       <ColNames>uuid
@@ -1796,7 +1801,7 @@ file_id</ColNames>
 default</CollationNames>
       <ClassIds>10062,3124,3126</ClassIds>
     </index>
-    <key id="72" parent="56" name="audios_pkey">
+    <key id="73" parent="56" name="audios_pkey">
       <ObjectId>112354</ObjectId>
       <StateNumber>12258</StateNumber>
       <ColNames>uuid
@@ -1805,67 +1810,67 @@ file_id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>audios_pkey</UnderlyingIndexName>
     </key>
-    <column id="73" parent="57" name="uuid">
+    <column id="74" parent="57" name="uuid">
       <Position>1</Position>
       <DataType>uuid|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>11761</StateNumber>
       <TypeId>2950</TypeId>
     </column>
-    <column id="74" parent="57" name="title">
+    <column id="75" parent="57" name="title">
       <Position>2</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11761</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="75" parent="57" name="thumb_url">
+    <column id="76" parent="57" name="thumb_url">
       <Position>3</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11761</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="76" parent="57" name="description">
+    <column id="77" parent="57" name="description">
       <Position>4</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11761</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="77" parent="57" name="message_text">
+    <column id="78" parent="57" name="message_text">
       <Position>5</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11761</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="78" parent="57" name="keyboard">
+    <column id="79" parent="57" name="keyboard">
       <Position>6</Position>
       <DataType>varchar(255) []|0s</DataType>
       <StateNumber>11761</StateNumber>
       <TypeId>1015</TypeId>
     </column>
-    <column id="79" parent="57" name="isActive">
+    <column id="80" parent="57" name="isActive">
       <Position>7</Position>
       <DataType>boolean|0s</DataType>
       <StateNumber>11761</StateNumber>
       <DefaultExpression>false</DefaultExpression>
       <TypeId>16</TypeId>
     </column>
-    <column id="80" parent="57" name="createdAt">
+    <column id="81" parent="57" name="createdAt">
       <Position>8</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>11761</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="81" parent="57" name="updatedAt">
+    <column id="82" parent="57" name="updatedAt">
       <Position>9</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>11761</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <index id="82" parent="57" name="inline_ads_pkey">
+    <index id="83" parent="57" name="inline_ads_pkey">
       <ObjectId>112230</ObjectId>
-      <StateNumber>12216</StateNumber>
+      <StateNumber>12445</StateNumber>
       <ColNames>uuid</ColNames>
       <Unique>1</Unique>
       <Primary>1</Primary>
@@ -1873,21 +1878,21 @@ file_id</ColNames>
       <CollationIds>0</CollationIds>
       <ClassIds>10062</ClassIds>
     </index>
-    <key id="83" parent="57" name="inline_ads_pkey">
+    <key id="84" parent="57" name="inline_ads_pkey">
       <ObjectId>112231</ObjectId>
       <StateNumber>11761</StateNumber>
       <ColNames>uuid</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>inline_ads_pkey</UnderlyingIndexName>
     </key>
-    <column id="84" parent="58" name="uuid">
+    <column id="85" parent="58" name="uuid">
       <Position>1</Position>
       <DataType>uuid|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12348</StateNumber>
       <TypeId>2950</TypeId>
     </column>
-    <column id="85" parent="58" name="count">
+    <column id="86" parent="58" name="count">
       <Position>2</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
@@ -1895,21 +1900,21 @@ file_id</ColNames>
       <DefaultExpression>0</DefaultExpression>
       <TypeId>20</TypeId>
     </column>
-    <column id="86" parent="58" name="createdAt">
+    <column id="87" parent="58" name="createdAt">
       <Position>3</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12348</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="87" parent="58" name="updatedAt">
+    <column id="88" parent="58" name="updatedAt">
       <Position>4</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12348</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <index id="88" parent="58" name="inline_query_counts_pkey">
+    <index id="89" parent="58" name="inline_query_counts_pkey">
       <ObjectId>112403</ObjectId>
       <StateNumber>12348</StateNumber>
       <ColNames>uuid</ColNames>
@@ -1919,47 +1924,47 @@ file_id</ColNames>
       <CollationIds>0</CollationIds>
       <ClassIds>10062</ClassIds>
     </index>
-    <key id="89" parent="58" name="inline_query_counts_pkey">
+    <key id="90" parent="58" name="inline_query_counts_pkey">
       <ObjectId>112404</ObjectId>
       <StateNumber>12348</StateNumber>
       <ColNames>uuid</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>inline_query_counts_pkey</UnderlyingIndexName>
     </key>
-    <column id="90" parent="59" name="user_id">
+    <column id="91" parent="59" name="user_id">
       <Position>1</Position>
       <DataType>varchar(255)|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12305</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="91" parent="59" name="name">
+    <column id="92" parent="59" name="name">
       <Position>2</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>12305</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="92" parent="59" name="username">
+    <column id="93" parent="59" name="username">
       <Position>3</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>12305</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="93" parent="59" name="createdAt">
+    <column id="94" parent="59" name="createdAt">
       <Position>4</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12305</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="94" parent="59" name="updatedAt">
+    <column id="95" parent="59" name="updatedAt">
       <Position>5</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12305</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <index id="95" parent="59" name="inline_users_pkey">
+    <index id="96" parent="59" name="inline_users_pkey">
       <ObjectId>112361</ObjectId>
       <StateNumber>12305</StateNumber>
       <ColNames>user_id</ColNames>
@@ -1970,40 +1975,86 @@ file_id</ColNames>
       <CollationNames>default</CollationNames>
       <ClassIds>3126</ClassIds>
     </index>
-    <key id="96" parent="59" name="inline_users_pkey">
+    <key id="97" parent="59" name="inline_users_pkey">
       <ObjectId>112362</ObjectId>
       <StateNumber>12305</StateNumber>
       <ColNames>user_id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>inline_users_pkey</UnderlyingIndexName>
     </key>
-    <column id="97" parent="60" name="user_id">
+    <column id="98" parent="60" name="uuid">
+      <Position>1</Position>
+      <DataType>uuid|0s</DataType>
+      <NotNull>1</NotNull>
+      <StateNumber>12425</StateNumber>
+      <TypeId>2950</TypeId>
+    </column>
+    <column id="99" parent="60" name="message_id">
+      <Position>2</Position>
+      <DataType>integer|0s</DataType>
+      <NotNull>1</NotNull>
+      <StateNumber>12425</StateNumber>
+      <DefaultExpression>0</DefaultExpression>
+      <TypeId>23</TypeId>
+    </column>
+    <column id="100" parent="60" name="createdAt">
+      <Position>3</Position>
+      <DataType>timestamp with time zone|0s</DataType>
+      <NotNull>1</NotNull>
+      <StateNumber>12425</StateNumber>
+      <TypeId>1184</TypeId>
+    </column>
+    <column id="101" parent="60" name="updatedAt">
+      <Position>4</Position>
+      <DataType>timestamp with time zone|0s</DataType>
+      <NotNull>1</NotNull>
+      <StateNumber>12425</StateNumber>
+      <TypeId>1184</TypeId>
+    </column>
+    <index id="102" parent="60" name="start_ads_pkey">
+      <ObjectId>112409</ObjectId>
+      <StateNumber>12425</StateNumber>
+      <ColNames>uuid</ColNames>
+      <Unique>1</Unique>
+      <Primary>1</Primary>
+      <AccessMethodId>403</AccessMethodId>
+      <CollationIds>0</CollationIds>
+      <ClassIds>10062</ClassIds>
+    </index>
+    <key id="103" parent="60" name="start_ads_pkey">
+      <ObjectId>112410</ObjectId>
+      <StateNumber>12425</StateNumber>
+      <ColNames>uuid</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>start_ads_pkey</UnderlyingIndexName>
+    </key>
+    <column id="104" parent="61" name="user_id">
       <Position>1</Position>
       <DataType>varchar(255)|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>11931</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="98" parent="60" name="name">
+    <column id="105" parent="61" name="name">
       <Position>2</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11931</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="99" parent="60" name="username">
+    <column id="106" parent="61" name="username">
       <Position>3</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11931</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="100" parent="60" name="role">
+    <column id="107" parent="61" name="role">
       <Position>4</Position>
       <DataType>enum_users_role|0s</DataType>
       <StateNumber>11931</StateNumber>
       <DefaultExpression>&apos;user&apos;::enum_users_role</DefaultExpression>
       <TypeId>112270</TypeId>
     </column>
-    <column id="101" parent="60" name="step">
+    <column id="108" parent="61" name="step">
       <Position>5</Position>
       <DataType>integer|0s</DataType>
       <NotNull>1</NotNull>
@@ -2011,27 +2062,27 @@ file_id</ColNames>
       <DefaultExpression>0</DefaultExpression>
       <TypeId>23</TypeId>
     </column>
-    <column id="102" parent="60" name="activeID">
+    <column id="109" parent="61" name="activeID">
       <Position>6</Position>
       <DataType>varchar(255)|0s</DataType>
       <StateNumber>11931</StateNumber>
       <TypeId>1043</TypeId>
     </column>
-    <column id="103" parent="60" name="createdAt">
+    <column id="110" parent="61" name="createdAt">
       <Position>7</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>11931</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="104" parent="60" name="updatedAt">
+    <column id="111" parent="61" name="updatedAt">
       <Position>8</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>11931</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <index id="105" parent="60" name="users_pkey">
+    <index id="112" parent="61" name="users_pkey">
       <ObjectId>112285</ObjectId>
       <StateNumber>11931</StateNumber>
       <ColNames>user_id</ColNames>
@@ -2042,21 +2093,21 @@ file_id</ColNames>
       <CollationNames>default</CollationNames>
       <ClassIds>3126</ClassIds>
     </index>
-    <key id="106" parent="60" name="users_pkey">
+    <key id="113" parent="61" name="users_pkey">
       <ObjectId>112286</ObjectId>
       <StateNumber>11931</StateNumber>
       <ColNames>user_id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>users_pkey</UnderlyingIndexName>
     </key>
-    <column id="107" parent="61" name="uuid">
+    <column id="114" parent="62" name="uuid">
       <Position>1</Position>
       <DataType>uuid|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12328</StateNumber>
       <TypeId>2950</TypeId>
     </column>
-    <column id="108" parent="61" name="count">
+    <column id="115" parent="62" name="count">
       <Position>2</Position>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
@@ -2064,28 +2115,28 @@ file_id</ColNames>
       <DefaultExpression>0</DefaultExpression>
       <TypeId>20</TypeId>
     </column>
-    <column id="109" parent="61" name="createdAt">
+    <column id="116" parent="62" name="createdAt">
       <Position>3</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12328</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="110" parent="61" name="updatedAt">
+    <column id="117" parent="62" name="updatedAt">
       <Position>4</Position>
       <DataType>timestamp with time zone|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12328</StateNumber>
       <TypeId>1184</TypeId>
     </column>
-    <column id="111" parent="61" name="voice_id">
+    <column id="118" parent="62" name="voice_id">
       <Position>5</Position>
       <DataType>uuid|0s</DataType>
       <NotNull>1</NotNull>
       <StateNumber>12328</StateNumber>
       <TypeId>2950</TypeId>
     </column>
-    <index id="112" parent="61" name="voice_counts_pkey">
+    <index id="119" parent="62" name="voice_counts_pkey">
       <ObjectId>112397</ObjectId>
       <StateNumber>12328</StateNumber>
       <ColNames>uuid</ColNames>
@@ -2095,7 +2146,7 @@ file_id</ColNames>
       <CollationIds>0</CollationIds>
       <ClassIds>10062</ClassIds>
     </index>
-    <key id="113" parent="61" name="voice_counts_pkey">
+    <key id="120" parent="62" name="voice_counts_pkey">
       <ObjectId>112398</ObjectId>
       <StateNumber>12328</StateNumber>
       <ColNames>uuid</ColNames>

@@ -2,9 +2,9 @@ import Command from "./commands.js";
 
 export default class Commands {
 
-    static async botStart(bot, db, message) {
+    static async botStart(bot, db, message, config) {
         if ((message.text === '/start' || message.text === '⬅️Ortga') && message.chat.type === 'private') {
-            await Command.onStart(bot, db, message)
+            await Command.onStart(bot, db, message, config)
         }
     }
 
@@ -39,11 +39,11 @@ export default class Commands {
         await Command.countInlineQuery(bot, db, query)
     }
 
-    static async adsController(bot, db, message, user) {
+    static async adsController(bot, db, message, user, config) {
         if (message.chat.type === 'private' && user?.role === 'admin') {
             await Command.manageInlineAds(bot, db, message, user)
         }
-        if (message.chat.type === 'private' && message.text === '🧾 Start reklama' && user.role === 'admin') {
+        if (message.chat.type === 'private' && user?.role === 'admin') {
             await Command.manageStartAds(bot, db, message, user)
         }
     }
@@ -212,6 +212,14 @@ export default class Commands {
     static async chosenInlineController (bot, db, result) {
         try {
             await Command.countInlineResult(bot, db, result)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async mailingController (bot, db, message, config, user) {
+        try {
+            await Command.mailingUsers(bot, db, message, config, user)
         } catch (e) {
             console.log(e)
         }
