@@ -13,8 +13,23 @@ async function postgres () {
         db.users = await Models.UserModel(Sequelize, sequelize)
         db.audios = await Models.AudioModel(Sequelize, sequelize)
         db.inline_ads = await Models.InlineAdsModel(Sequelize, sequelize)
+        db.inline_users = await Models.InlineUserModel(Sequelize, sequelize)
+        db.voice_counts = await Models.voiceCounterModel(Sequelize, sequelize)
+        db.inline_query_counts = await Models.inlineQueryCounterModel(Sequelize, sequelize)
 
-        console.log(db)
+        await db.audios.hasOne(db.voice_counts, {
+            foreignKey: {
+                name: 'voice_id',
+                allowNull: false
+            }
+        })
+
+        await db.voice_counts.belongsTo(db.audios, {
+            foreignKey: {
+                name: 'voice_id',
+                allowNull: false
+            }
+        })
 
         await sequelize.sync({force: false})
         return db

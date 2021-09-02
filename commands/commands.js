@@ -30,9 +30,9 @@ export default class Commands {
             }
 
             let keyboard
-            if (findUser.dataValues?.role === 'admin') {
+            if (findUser?.dataValues?.role === 'admin') {
                 keyboard = [["🎶 Barcha ovozlar"], ["➕ Ovoz qo'shish", "7️⃣ Haftalik statistika"], ["1️⃣ Kunlik statistika", "🔢 Oylik statistika"], ["⚙️Sozlamalar", "💲Reklama"]]
-            } else if (findUser.dataValues.role === 'user') {
+            } else if (findUser.dataValues?.role === 'user') {
                 keyboard = [["🎶 Barcha ovozlar"], ["💲Reklama", "ℹ ️Biz haqimizda"], ["➕ Ovoz qo'shish"]]
             }
 
@@ -106,18 +106,18 @@ export default class Commands {
                 })
             }
 
-            if (user.step === 2 && message.voice) {
+            if (user?.step === 2 && message.voice) {
 
                 let findVoice = await db.audios.findOne({
                     where: {
-                        file_id: message.voice.file_id
+                        file_unique_id: message.voice.file_unique_id
                     }
                 })
 
                 if (!findVoice) {
                     await db.users.update({
                         step: 3,
-                        activeID: message.voice.file_id
+                        activeID: message.voice.file_unique_id
                     }, {
                         where: {
                             user_id: `${message.from.id}`
@@ -126,6 +126,7 @@ export default class Commands {
 
                     await db.audios.create({
                         file_id: message.voice.file_id,
+                        file_unique_id: message.voice.file_unique_id,
                         name: 'ovozqani',
                         tags: ['ovozqani']
                     })
@@ -144,13 +145,13 @@ export default class Commands {
                 }
             }
 
-            if (user.step === 3 && message.text) {
+            if (user?.step === 3 && message.text) {
 
                 await db.audios.update({
                     name: message.text
                 }, {
                     where: {
-                        file_id: user.activeID
+                        file_unique_id: user.activeID
                     }
                 })
 
@@ -164,13 +165,13 @@ export default class Commands {
                 await bot.sendMessage(message.chat.id, "Ovoz teglarini yozing")
             }
 
-            if (user.step === 4 && message.text) {
+            if (user?.step === 4 && message.text) {
 
                 await db.audios.update({
                     tags: message.text.split(" ")
                 }, {
                     where: {
-                        file_id: user.activeID
+                        file_unique_id: user.activeID
                     }
                 })
 
@@ -185,8 +186,6 @@ export default class Commands {
 
                 await bot.sendMessage(message.chat.id, "Ovoz qo'shildi")
             }
-
-            console.log(user)
         } catch (e) {
             console.log(e)
         }
@@ -300,11 +299,17 @@ export default class Commands {
         }
     }
 
-    static async getVoices(bot, db, message) {
+    static async getVoices(bot, db, message, user) {
         try {
             if (message.text === '🎶 Barcha ovozlar') {
-                let voices = await db.audios.findAll({raw: true})
-                let text = voices.map(voice => (`/${voice.id}. ${voice.name} - 12 \n`));
+                let voices = await db.audios.findAll({
+                    raw: true,
+                    include: {
+                        model: db.voice_counts
+                    },
+                    order: [["id", "ASC"]]
+                })
+                let text = voices.map(voice => (`/${voice.id}. ${voice.name} (${voice['voice_count.count']}) \n`));
                 await bot.sendMessage(message.chat.id, text.join(''), {
                     parse_mode: "HTML"
                 })
@@ -313,8 +318,8 @@ export default class Commands {
             let messageNum, isContainsSlash
 
             if (message?.text) {
-                messageNum = parseInt(message.text?.replace(/\\|\//g,''))
-                isContainsSlash = (message.text?.split(/(?!$)/u))[0] === '/'
+                messageNum = parseInt(message?.text?.replace(/\\|\//g,''))
+                isContainsSlash = (message?.text?.split(/(?!$)/u))[0] === '/'
             }
 
             let voicesCount = await db.audios.count()
@@ -329,14 +334,57 @@ export default class Commands {
                     raw: true
                 })
 
-                let keyboard = [
-                    [
-                        {
-                            text: "Ulashish 🔁",
-                            switch_inline_query: `${voice.name}`
-                        }
+                await db.voice_counts.increment({
+                    count: 1
+                }, {
+                    where: {
+                        voice_id: voice.uuid
+                    }
+                })
+
+                let keyboard
+
+                if (user.role === 'admin' || user.role === 'moderator') {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice.name}`
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'zgartirish",
+                                callback_data: "change_voice"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Nomni o'zgartirish",
+                                callback_data: "change_name"
+                            },
+                            {
+                                text: "Teglarni o'zgartirish",
+                                callback_data: "change_tags"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'chirish",
+                                callback_data: "off_voice"
+                            }
+                        ]
                     ]
-                ]
+                } else {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice.name}`
+                            }
+                        ]
+                    ]
+                }
 
                 await bot.sendVoice(message.chat.id, voice.file_id, {
                     caption: `<b>Nomi:</b> ${voice.name}\n<b>Teglar:</b> ${voice.tags.join(', ')}\n<b>Ishlatilgan:</b> 1 marta`,
@@ -350,6 +398,7 @@ export default class Commands {
 
         } catch (e) {
             console.log(e)
+            await bot.sendMessage(message.chat.id, `Ovozlar topilmadi!`)
         }
     }
 
@@ -403,10 +452,9 @@ export default class Commands {
                         title: message.text
                     })
 
-                    console.log(inlineAds)
-
                     await db.users.update({
-                        step: 6
+                        step: 6,
+                        activeID: inlineAds.uuid
                     }, {
                         where: {
                             user_id: user.user_id
@@ -422,9 +470,10 @@ export default class Commands {
                         thumb_url: message?.text
                     }, {
                         where: {
-                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                            uuid: user.activeID
                         }
                     })
+
                     await db.users.update({
                         step: 7
                     }, {
@@ -442,7 +491,7 @@ export default class Commands {
                         description: message.text
                     }, {
                         where: {
-                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                            uuid: user.activeID
                         }
                     })
                     await db.users.update({
@@ -462,7 +511,7 @@ export default class Commands {
                         message_text: message.text
                     }, {
                         where: {
-                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                            uuid: user.activeID
                         }
                     })
                     await db.users.update({
@@ -482,11 +531,20 @@ export default class Commands {
                         keyboard: [message.text]
                     }, {
                         where: {
-                            uuid: `8b5e9bd7-74f3-4276-89b6-6c1615c666ba`
+                            uuid: user.activeID
                         }
                     })
+
+                    let inlineAd = await db.inline_ads.findOne({
+                        where: {
+                            uuid: user.activeID
+                        },
+                        raw: true
+                    })
+
                     await db.users.update({
-                        step: 1
+                        step: 1,
+                        activeID: null
                     }, {
                         where: {
                             user_id: `${user.user_id}`
@@ -510,7 +568,7 @@ export default class Commands {
                             }
                         ]
                     ]
-                    await bot.sendMessage(message.chat.id, `Reklama muvaffaqiyatli yaratildi!`, {
+                    await bot.sendMessage(message.chat.id, `Reklama muvaffaqiyatli yaratildi!\n#id: ${inlineAd.uuid}`, {
                         parse_mode: "HTML",
                         reply_markup: {
                             inline_keyboard: keyboard
@@ -574,7 +632,11 @@ export default class Commands {
             }
 
             voices = await db.audios.findAndCountAll({
-                raw: true
+                raw: true,
+                order: [ [ 'createdAt', 'DESC' ]],
+                include: {
+                    model: db.voice_counts
+                }
             })
 
 
@@ -585,7 +647,11 @@ export default class Commands {
                             [Op.iLike]: `%${query.query}%`
                         }
                     },
-                    raw: true
+                    order: [ [ 'createdAt', 'DESC' ]],
+                    raw: true,
+                    include: {
+                        model: db.voice_counts
+                    }
                 })
             }
 
@@ -594,8 +660,7 @@ export default class Commands {
                     type: 'voice',
                     id: voice.id,
                     voice_file_id: voice.file_id,
-                    title: voice.name,
-                    caption: voice.name
+                    title: `${voice.name} - ${voice['voice_count.count']}`
                 })
             }
 
@@ -615,6 +680,325 @@ export default class Commands {
                 })
             }
 
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async addInlineUser(bot, db, query) {
+        try {
+            let user = await db.inline_users.findOne({
+                where: {
+                    user_id: `${query.from.id}`
+                }
+            })
+
+            if (!user) {
+                await db.inline_users.create({
+                    user_id: query.from.id,
+                    name: query.from.first_name,
+                    username: query.from.username
+                })
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async countInlineQuery(bot, db, query) {
+        try {
+            let inlineQuery = await db.inline_query_counts.findOne({
+                order: [["createdAt", "DESC"]],
+                raw: true
+            })
+
+            if (!inlineQuery) {
+                await db.inline_query_counts.create({
+                    count: 1
+                })
+            } else {
+                await db.inline_query_counts.increment({
+                    count: 1
+                }, {
+                    where: {
+                        uuid: inlineQuery.uuid
+                    }
+                })
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async editVoice(bot, db, message, user) {
+        try {
+            if (user?.step === 10 && message?.voice) {
+                await db.audios.update({
+                    file_id: message.voice.file_id,
+                    file_unique_id: message.voice.file_unique_id
+                }, {
+                    where: {
+                        file_unique_id: user.activeID
+                    }
+                })
+
+                let voice = await db.audios.findOne({
+                    where: {
+                        file_unique_id: message.voice.file_unique_id
+                    }
+                })
+
+                await bot.sendMessage(message.chat.id, `Audio o'zgartirildi.`)
+
+                await db.users.update({
+                    step: 1,
+                    activeID: null
+                }, {
+                    where: {
+                        user_id: `${message.chat.id}`
+                    }
+                })
+
+                let keyboard
+
+                if (user.role === 'admin' || user.role === 'moderator') {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice?.name}`
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'zgartirish",
+                                callback_data: "change_voice"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Nomni o'zgartirish",
+                                callback_data: "change_name"
+                            },
+                            {
+                                text: "Teglarni o'zgartirish",
+                                callback_data: "change_tags"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'chirish",
+                                callback_data: "off_voice"
+                            }
+                        ]
+                    ]
+                } else {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice.name}`
+                            }
+                        ]
+                    ]
+                }
+
+                await bot.sendVoice(message.chat.id, voice.file_id, {
+                    caption: `<b>Nomi:</b> ${voice.name}\n<b>Teglar:</b> ${voice.tags.join(', ')}\n<b>Ishlatilgan:</b> 1 marta`,
+                    parse_mode: "HTML",
+                    reply_markup: {
+                        inline_keyboard: keyboard
+                    }
+                })
+            } else if (user.step === 11 && message.text !== '⬅️Ortga') {
+                await db.audios.update({
+                    name: message?.text || 'ovozqani'
+                }, {
+                    where: {
+                        file_unique_id: user.activeID
+                    }
+                })
+
+                let voice = await db.audios.findOne({
+                    where: {
+                        file_unique_id: user.activeID
+                    }
+                })
+
+                await bot.sendMessage(message.chat.id, `Audio nomi o'zgartirildi.`)
+
+                await db.users.update({
+                    step: 1,
+                    activeID: null
+                }, {
+                    where: {
+                        user_id: `${message.chat.id}`
+                    }
+                })
+
+                let keyboard
+
+                if (user.role === 'admin' || user.role === 'moderator') {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice?.name}`
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'zgartirish",
+                                callback_data: "change_voice"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Nomni o'zgartirish",
+                                callback_data: "change_name"
+                            },
+                            {
+                                text: "Teglarni o'zgartirish",
+                                callback_data: "change_tags"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'chirish",
+                                callback_data: "off_voice"
+                            }
+                        ]
+                    ]
+                } else {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice.name}`
+                            }
+                        ]
+                    ]
+                }
+
+                await bot.sendVoice(message.chat.id, voice.file_id, {
+                    caption: `<b>Nomi:</b> ${voice.name}\n<b>Teglar:</b> ${voice.tags.join(', ')}\n<b>Ishlatilgan:</b> 1 marta`,
+                    parse_mode: "HTML",
+                    reply_markup: {
+                        inline_keyboard: keyboard
+                    }
+                })
+            } else if (user.step === 12 && message.text !== '⬅️Ortga') {
+                await db.audios.update({
+                    tags: message?.text.split(" ") || ['ovozqani']
+                }, {
+                    where: {
+                        file_unique_id: user.activeID
+                    }
+                })
+
+                let voice = await db.audios.findOne({
+                    where: {
+                        file_unique_id: user.activeID
+                    }
+                })
+
+                await bot.sendMessage(message.chat.id, `Audio teglari o'zgartirildi.`)
+
+                await db.users.update({
+                    step: 1,
+                    activeID: null
+                }, {
+                    where: {
+                        user_id: `${message.chat.id}`
+                    }
+                })
+
+                let keyboard
+
+                if (user.role === 'admin' || user.role === 'moderator') {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice?.name}`
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'zgartirish",
+                                callback_data: "change_voice"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Nomni o'zgartirish",
+                                callback_data: "change_name"
+                            },
+                            {
+                                text: "Teglarni o'zgartirish",
+                                callback_data: "change_tags"
+                            }
+                        ],
+                        [
+                            {
+                                text: "Ovozni o'chirish",
+                                callback_data: "off_voice"
+                            }
+                        ]
+                    ]
+                } else {
+                    keyboard = [
+                        [
+                            {
+                                text: "Ulashish 🔁",
+                                switch_inline_query: `${voice.name}`
+                            }
+                        ]
+                    ]
+                }
+
+                await bot.sendVoice(message.chat.id, voice.file_id, {
+                    caption: `<b>Nomi:</b> ${voice.name}\n<b>Teglar:</b> ${voice.tags.join(', ')}\n<b>Ishlatilgan:</b> 1 marta`,
+                    parse_mode: "HTML",
+                    reply_markup: {
+                        inline_keyboard: keyboard
+                    }
+                })
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    static async countInlineResult(bot, db, result) {
+        try {
+            let voice = await db.audios.findOne({
+                where: {
+                    id: Number(result.result_id)
+                },
+                raw: true
+            })
+
+            let findVoice = await db.voice_counts.findOne({
+                where: {
+                    voice_id: voice.uuid
+                }
+            })
+
+            if (!findVoice) {
+                await db.voice_counts.create({
+                    count: 1,
+                    voice_id: voice.uuid
+                })
+            } else {
+                await db.voice_counts.increment({
+                    count: 1
+                }, {
+                    where: {
+                        voice_id: voice.uuid
+                    }
+                })
+            }
         } catch (e) {
             console.log(e)
         }

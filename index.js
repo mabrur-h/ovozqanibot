@@ -12,7 +12,7 @@ const bot = new TelegramBot(TOKEN, {
 bot.on('message', async (message) => {
     try {
         let db = await postgres()
-
+        console.log(message)
         let user = await db.users.findOne({
             where: {
                 user_id: `${message.chat.id}`
@@ -20,15 +20,14 @@ bot.on('message', async (message) => {
             raw: true
         })
 
-        console.log(user)
-
         await Commands.botStart(bot, db, message)
         await Commands.botRandom(bot, db, message)
         await Commands.newVoice(bot, db, message, user)
         await Commands.newAdmin(bot, db, message, user)
-        await Commands.getAudios(bot, db, message)
+        await Commands.getAudios(bot, db, message, user)
         await Commands.changeSettings(bot, db, message, user)
         await Commands.adsController(bot, db, message, user)
+        await Commands.editVoiceController(bot, db, message, user)
 
     } catch (e) {
         console.log(e)
@@ -39,6 +38,7 @@ bot.on('inline_query', async (query) => {
     try {
         let db = await postgres()
 
+        await Commands.InlineUserController(bot, db, query)
         await Commands.searchVoices(bot, db, query)
 
     } catch (e) {
@@ -50,11 +50,25 @@ bot.on('callback_query', async (query) => {
     try {
         let db = await postgres()
 
-        console.log(query)
+        let user = await db.users.findOne({
+            where: {
+                user_id: `${query.message.chat.id}`
+            },
+            raw: true
+        })
 
-        await Commands.callbackQueryController(bot, db, query)
+        await Commands.callbackQueryController(bot, db, query, user)
 
-        console.log(query)
+    } catch (e) {
+        console.log(e)
+    }
+})
+
+bot.on('chosen_inline_result', async (result) => {
+    try {
+        let db = await postgres()
+
+        await Commands.chosenInlineController(bot, db, result)
     } catch (e) {
         console.log(e)
     }
